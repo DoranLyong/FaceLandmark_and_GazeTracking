@@ -1,0 +1,13 @@
+Required:
+    inputPath : "./Inputs/data.csv"  # path to the csv input
+    displayWidth : 1440
+    displayHeight : 900 
+
+Optional: 
+    alpha : 0.6  # alpha for the gaze overlay
+    outputName : "./Outputs/output-name.png"
+    bg_image : "./Inputs/bg-image.png" # path to the background image
+
+AdvancedOpt: 
+    sizeGM : 200 # width and height of gaussian matrix; i.e., (200, 200) shape kernel
+    stdGM : 33 # standard deviation of gaussian distribution
