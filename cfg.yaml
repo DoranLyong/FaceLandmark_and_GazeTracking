@@ -1,7 +1,7 @@
 Required:
-    inputPath : "./Inputs/data.csv"  # path to the csv input
-    displayWidth : 1440
-    displayHeight : 900 
+    inputPath : "./videos"  # path to video samples 
+    displayWidth : 1280  # (ref) https://www.epiphan.com/userguides/avio-4k/Content/UserGuides/VideoGrabber/UVC/3-Capture/fpsResolutions&Ratios.htm
+    displayHeight : 720 
 
 Optional: 
     alpha : 0.6  # alpha for the gaze overlay
