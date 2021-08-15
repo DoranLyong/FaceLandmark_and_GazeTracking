@@ -36,7 +36,7 @@ def video_process(cap:cv2.VideoCapture):
     try: 
 
         pTime = 0  # past time 
-        detector = FaceMeshDetector(maxFaces=1)
+        detector = FaceMeshDetector(maxFaces=1) # only get one face 
 
         while True:
             ret, frame = cap.read() # read the first frame
@@ -47,8 +47,9 @@ def video_process(cap:cv2.VideoCapture):
 
             
 
-            inferenced_img, blank, faces = detector.findFaceMesh(frame)
+            inferenced_img, landmarks_only, faces_kps, onlyface_kps, onlyfaces = detector.findFaceMesh(frame)
             
+
 
 
 
@@ -57,14 +58,35 @@ def video_process(cap:cv2.VideoCapture):
             pTime = cTime
 
 
+            # ========= # 
+            # Visualize #
+            # ========= # 
+
             cv2.putText(frame, f"FPS: {int(process_fps)}", (20, 70), cv2.FONT_HERSHEY_PLAIN, 3, (0, 255, 0), 3)
             cv2.namedWindow("WebCam_view", cv2.WINDOW_AUTOSIZE)
             cv2.imshow("WebCam_view", frame )
 
             cv2.namedWindow("Landmarks", cv2.WINDOW_AUTOSIZE)
-            cv2.imshow("Landmarks", blank )
+            cv2.imshow("Landmarks", landmarks_only )
 
+
+            print(f"num faces: {len(faces_kps)}")
+
+            for idx in range(len(faces_kps)):
+                kp_portrait = np.zeros_like(onlyfaces[idx])
+
+                face_img = onlyfaces[idx].copy()
+
+                for x,y in onlyface_kps[idx]:
+                    cv2.circle(face_img, (int(x),int(y)), 1, (255,255,0), -1)
+                    cv2.circle(kp_portrait, (int(x),int(y)), 1, (255,255,255), -1)
+                    
             
+                cv2.imshow(f"ID: {idx}", face_img)
+                cv2.imshow(f"Landmakrs of ID: {idx}", kp_portrait)
+                cv2.imshow(f"Face only of ID:{idx}", onlyfaces[idx])
+
+
             key = cv2.waitKey(1)
 
             
@@ -100,7 +122,7 @@ if __name__ == '__main__':
     # ================ # 
     # Get video frames #
     # ================ #
-    cap = cv2.VideoCapture(0)    
+    cap = cv2.VideoCapture(data_path)    
     video_fps = cap.get(cv2.CAP_PROP_FPS) 	# get default video FPS
     print(f"fps: {video_fps}")
 

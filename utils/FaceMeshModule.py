@@ -6,6 +6,8 @@ import time
 import cv2 
 import numpy as np
 import mediapipe as mp
+import albumentations as A
+    
 
 from .imtools import ( gaussian_kernel,
 
@@ -29,12 +31,22 @@ class FaceMeshDetector():
                                                     self.minDetectionCon, self.minTrackCon)
         self.drawSpec = self.mpDraw.DrawingSpec(thickness=1, circle_radius=1)
 
+        # ============== #  
+        # Albumentations # 
+        # ============== #  
+        self.transform = A.Compose( [ A.Resize(height=224, width=224),  # (ref) https://www.programcreek.com/python/example/120573/albumentations.Resize
+                                                                    ],    # (ref)https://albumentations.ai/docs/api_reference/augmentations/geometric/resize/
+                                    keypoint_params=A.KeypointParams(format='xy', remove_invisible=True, angle_in_degrees=True) # (ref) https://albumentations.ai/docs/getting_started/keypoints_augmentation/ 
+                                    )
+
 
     def findFaceMesh(self, img, draw=True):
         raw_img = img.copy()
         self.imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         self.results = self.faceMesh.process(self.imgRGB)
-        faces = []
+        faces_kps = []
+        onlyface_kps = []
+        onlyfaces = [] 
 
         blank_img = np.zeros_like(img)
 
@@ -60,7 +72,7 @@ class FaceMeshDetector():
 #                               0.7, (0, 255, 0), 1)
 
 #                    print(id,x,y)  # (Landmark_num , x_coordi, y_coordi)
-                    face.append([x,y,z])
+                    face.append([x,y])
 
 
 
@@ -83,55 +95,55 @@ class FaceMeshDetector():
                 cv2.rectangle(img, (cx_min, cy_min), (cx_max, cy_max), (255, 255, 0), 2)
 
 
-                # ========================= # 
-                #     Get the face area     # 
-                # ========================= #
+                # ================================== # 
+                #     Get the face area in resize    # 
+                # ================================== #
+                if faceLms.landmark:
+                    
+                    cropped_face = raw_img[cy_min:cy_max+1, cx_min:cx_max+1]
+                    cropped_face = cv2.resize(cropped_face, dsize=(224,224))  
+                    
 
-#                cropped_face = raw_img[cy_min:cy_max+1, cx_min:cx_max+1]
-#                print(cropped_face.shape)
-#                cropped_face = cv2.resize(cropped_face, dsize=(224,224))
-#
-#
-#                cv2.imshow("Face only:RGB", cropped_face)
+                    transformed_kps = self.kp_transform(face, *[cx_min, cy_min, cx_max, cy_max] )
 
-                heatmap = draw_heatmap(face, *[cx_min, cy_min, cx_max, cy_max])
+                    onlyfaces.append(cropped_face)
+                    onlyface_kps.append(transformed_kps)
 
+                faces_kps.append(face)
 
-                faces.append(face)
-        return img, blank_img,faces
-
-
-
-
-
-def draw_heatmap(face_landmarks:list, *bbox):
-
-    cx_min, cy_min, cx_max, cy_max = bbox
-
-    h = cy_max  - cy_min + 1 
-    w = cx_max  - cx_min + 1 
-    
-    portrait = np.zeros( [h, w, 3], np.uint8 )
-
-
-    raw_landmark = np.array(face_landmarks) # (x, y, z )
-    translation = np.array([cx_min, cy_min, 0])
-
-    landmark = raw_landmark - translation   # zero-centroid
-
-
-    for x, y ,z in landmark:
-        cv2.circle(portrait, (x,y), 1, (0,255,0), -1)
-
-
-    cv2.imshow("portrait", portrait)
-    
+        return img, blank_img,faces_kps, onlyface_kps, onlyfaces
 
 
 
-def iris_detector():
-    """ (ref) https://towardsdatascience.com/real-time-eye-tracking-using-opencv-and-dlib-b504ca724ac6
-    """
+
+
+    def kp_transform(self, face_landmarks:list, *bbox ):
+
+        # ==================================== # 
+        # Keypoints(=landmarks) transformation # 
+        # ==================================== # 
+        # (ref) https://albumentations.ai/docs/getting_started/keypoints_augmentation/
+        # (ref) https://imgaug.readthedocs.io/en/latest/source/jupyter_notebooks.html
+
+        cx_min, cy_min, cx_max, cy_max = bbox
+
+        h = cy_max  - cy_min + 1 
+        w = cx_max  - cx_min + 1 
+
+        portrait = np.zeros( [h, w], np.uint8 )
+
+
+        raw_landmark = np.array(face_landmarks) # (x, y )
+        translation = np.array([cx_min, cy_min])
+
+        landmark = raw_landmark - translation   # zero-centroid
+
+        transformed = self.transform(   image = portrait, 
+                                        keypoints= landmark.tolist(), # (ref) https://appia.tistory.com/175
+                                    )
+
+
+        return transformed['keypoints']
 
 
 

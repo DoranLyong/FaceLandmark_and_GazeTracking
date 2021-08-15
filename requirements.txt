@@ -3,3 +3,4 @@ omegaconf
 tqdm
 opencv-python
 numpy 
+albumentations
