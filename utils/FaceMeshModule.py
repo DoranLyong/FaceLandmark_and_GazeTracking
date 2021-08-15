@@ -27,10 +27,11 @@ class FaceMeshDetector():
         self.mpFaceMesh = mp.solutions.face_mesh
         self.faceMesh = self.mpFaceMesh.FaceMesh(   self.staticMode, self.maxFaces,
                                                     self.minDetectionCon, self.minTrackCon)
-        self.drawSpec = self.mpDraw.DrawingSpec(thickness=1, circle_radius=2)
+        self.drawSpec = self.mpDraw.DrawingSpec(thickness=1, circle_radius=1)
 
 
     def findFaceMesh(self, img, draw=True):
+        raw_img = img.copy()
         self.imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         self.results = self.faceMesh.process(self.imgRGB)
         faces = []
@@ -54,7 +55,6 @@ class FaceMeshDetector():
 
                 for id, lm in enumerate(faceLms.landmark):
 #                    print(lm)
-                    print(id)
                     x, y, z = int(lm.x * iw), int(lm.y * ih), int(lm.z * ic)
 #                    cv2.putText(img, str(id), (x, y), cv2.FONT_HERSHEY_PLAIN,
 #                               0.7, (0, 255, 0), 1)
@@ -81,8 +81,18 @@ class FaceMeshDetector():
                         cy_max = y 
 
                 cv2.rectangle(img, (cx_min, cy_min), (cx_max, cy_max), (255, 255, 0), 2)
-                cv2.rectangle(blank_img, (cx_min, cy_min), (cx_max, cy_max), (255, 255, 0), 2)
 
+
+                # ========================= # 
+                #     Get the face area     # 
+                # ========================= #
+
+#                cropped_face = raw_img[cy_min:cy_max+1, cx_min:cx_max+1]
+#                print(cropped_face.shape)
+#                cropped_face = cv2.resize(cropped_face, dsize=(224,224))
+#
+#
+#                cv2.imshow("Face only:RGB", cropped_face)
 
                 heatmap = draw_heatmap(face, *[cx_min, cy_min, cx_max, cy_max])
 

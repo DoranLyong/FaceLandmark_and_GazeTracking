@@ -100,7 +100,7 @@ if __name__ == '__main__':
     # ================ # 
     # Get video frames #
     # ================ #
-    cap = cv2.VideoCapture(data_path)    
+    cap = cv2.VideoCapture(0)    
     video_fps = cap.get(cv2.CAP_PROP_FPS) 	# get default video FPS
     print(f"fps: {video_fps}")
 
