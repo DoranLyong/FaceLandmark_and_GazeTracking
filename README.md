@@ -24,7 +24,7 @@ For the iris example, download ```iris_landmark.tflite```
 ```bash
 ~$ python FaceMesh_with_rough_pupil.py  # Mediapipe face mesh & OpenCV usage eye pupil 
 
-~$ python FaceMesh_with_rough_pupil.py # Mediapipe face mesh & iris 
+~$ python FaceMesh_with_iris.py # Mediapipe face mesh & iris 
 ```
 
 
