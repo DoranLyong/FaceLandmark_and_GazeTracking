@@ -1,5 +1,21 @@
 # 468 Face Landmarks tutorial 
 
+#### 1. Install requirements 
+
+```bash 
+~$ pip install -r -U requirements.txt
+```
+
+
+
+
+
+#### 2. Run the code 
+
+```bash
+~$ python main.py 
+```
+
 
 
 
@@ -16,3 +32,9 @@
 [9] [Attention Mesh: High-fidelity Face Mesh Prediction in Real-time](https://www.arxiv-vanity.com/papers/2006.10962/) / 논문 설명 <br/>
 [10] [Face Mesh, ailia-models, github](https://github.com/axinc-ai/ailia-models/tree/master/face_recognition/facemesh) / <br/>
 
+
+
+###### Pupil detection
+
+[11] [Gaze Tracking, github](https://github.com/antoinelame/GazeTracking) / iris 위치 추출을 위한 예시 참고  <br/>
+[12] [Real-time Pupil Tracking from monocular Video, github](https://github.com/cedriclmenard/irislandmarks.pytorch) / Google Mediapipe의  iris detection 인데 이건 PyTorch로 구현 됨 <br/>[13] [MediaPipe Iris: 실시간 홍채추적 및 깊이측정](https://brunch.co.kr/@synabreu/93) / 

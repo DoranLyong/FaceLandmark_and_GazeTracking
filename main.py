@@ -1,5 +1,3 @@
-
-
 import sys 
 import os 
 import os.path as osp
@@ -13,15 +11,7 @@ from tqdm import tqdm
 from omegaconf import OmegaConf #(ref) https://majianglin2003.medium.com/python-omegaconf-a33be1b748ab
 
 from utils.FaceMeshModule import FaceMeshDetector
-
-
-
-
-
-
-
-
-
+from gaze_tracking import GazeTracking
 
 
 
@@ -37,6 +27,8 @@ def video_process(cap:cv2.VideoCapture):
 
         pTime = 0  # past time 
         detector = FaceMeshDetector(maxFaces=1) # only get one face 
+        gaze = GazeTracking()
+
 
         while True:
             ret, frame = cap.read() # read the first frame
@@ -50,17 +42,14 @@ def video_process(cap:cv2.VideoCapture):
             inferenced_img, landmarks_only, faces_kps, onlyface_kps, onlyfaces = detector.findFaceMesh(frame)
             
 
-
-
-
             cTime = time.time() # current time 
             process_fps = 1 / (cTime - pTime)
             pTime = cTime
 
 
-            # ========= # 
-            # Visualize #
-            # ========= # 
+            # ======================== # 
+            #         Visualize        #
+            # ======================== # 
 
             cv2.putText(frame, f"FPS: {int(process_fps)}", (20, 70), cv2.FONT_HERSHEY_PLAIN, 3, (0, 255, 0), 3)
             cv2.namedWindow("WebCam_view", cv2.WINDOW_AUTOSIZE)
@@ -74,13 +63,35 @@ def video_process(cap:cv2.VideoCapture):
 
             for idx in range(len(faces_kps)):
                 kp_portrait = np.zeros_like(onlyfaces[idx])
-
                 face_img = onlyfaces[idx].copy()
 
+
+                # ======================== # 
+                # Get iris using face mesh # 
+                # ======================== # 
+                gaze.refresh(onlyfaces[idx], onlyface_kps[idx] )
+
+                left_pupil = gaze.pupil_left_coords()  # (x, y) order
+                right_pupil = gaze.pupil_right_coords()
+                
+
+                # ================ # 
+                # pupil annotation # 
+                # ================ # 
+                cv2.circle(face_img, left_pupil, 3, (0,0, 255), -1)
+                cv2.circle(face_img, right_pupil, 3, (0,0, 255), -1)
+                cv2.circle(kp_portrait, left_pupil, 3, (255,255,255), -1)                   
+                cv2.circle(kp_portrait, right_pupil, 3, (255,255,255), -1)                   
+
+
                 for x,y in onlyface_kps[idx]:
+                    # =============== # 
+                    # Mesh annotation # 
+                    # =============== # 
                     cv2.circle(face_img, (int(x),int(y)), 1, (255,255,0), -1)
                     cv2.circle(kp_portrait, (int(x),int(y)), 1, (255,255,255), -1)
-                    
+
+
             
                 cv2.imshow(f"ID: {idx}", face_img)
                 cv2.imshow(f"Landmakrs of ID: {idx}", kp_portrait)
@@ -94,19 +105,11 @@ def video_process(cap:cv2.VideoCapture):
                 break
 
 
-
-
-
     finally:
         cv2.destroyAllWindows()
 
         # _Stop streaming
         cap.release()        
-
-
-
-
-
 
 
 
@@ -117,7 +120,7 @@ if __name__ == '__main__':
     
     data_dir = cfg.Required.inputPath
     video_list = sorted(os.listdir(data_dir))    
-    data_path = osp.join(data_dir, video_list[0])
+    data_path = osp.join(data_dir, video_list[-1])
 
     # ================ # 
     # Get video frames #
