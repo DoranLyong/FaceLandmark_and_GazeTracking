@@ -7,10 +7,21 @@ import cv2
 import numpy as np
 import mediapipe as mp
 import albumentations as A
+
+from .iris import IrisTracking
     
 
 
+
+
 class FaceMeshDetector():
+
+    YELLOW = (0, 255, 255)
+    GREEN = (0, 255, 0)
+    BLUE = (255, 0, 0)
+    RED = (0, 0, 255)
+    SMALL_CIRCLE_SIZE = 1
+    LARGE_CIRCLE_SIZE = 2    
 
     def __init__(self, staticMode=False, maxFaces=2, minDetectionCon=0.5, minTrackCon=0.5):
 
@@ -24,6 +35,8 @@ class FaceMeshDetector():
         self.faceMesh = self.mpFaceMesh.FaceMesh(   self.staticMode, self.maxFaces,
                                                     self.minDetectionCon, self.minTrackCon)
         self.drawSpec = self.mpDraw.DrawingSpec(thickness=1, circle_radius=1)
+
+        self.iris  = IrisTracking()
 
         # ============== #  
         # Albumentations # 
@@ -44,31 +57,58 @@ class FaceMeshDetector():
 
         blank_img = np.zeros_like(img)
 
+
         if self.results.multi_face_landmarks:
+
             for faceLms in self.results.multi_face_landmarks:
-                if draw:
-                    self.mpDraw.draw_landmarks(img, faceLms, self.mpFaceMesh.FACE_CONNECTIONS,
-                                                self.drawSpec, self.drawSpec) # (ref) https://github.com/google/mediapipe/blob/master/mediapipe/python/solutions/drawing_utils.py
-                    self.mpDraw.draw_landmarks(blank_img, faceLms, self.mpFaceMesh.FACE_CONNECTIONS,
-                                                self.drawSpec, self.drawSpec)
+
+
                 face = []
 
                 ih, iw, ic = img.shape
                 cy_min, cx_min = ih, iw
-                cy_max, cx_max = 0, 0 
+                cy_max, cx_max = 0, 0                 
+
+                # ========================= # 
+                #         Get iris          # 
+                # ========================= # 
+                landmarks = np.array([(lm.x, lm.y, lm.z) for lm in faceLms.landmark])
+
+                self.iris.refresh(self.imgRGB, landmarks)
+                left_irisLM = self.iris.left_iris()  # (5, 3) shape with (x, y, z) order 
+                right_irisLM = self.iris.right_iris() # those are normalized coordinates; (0, 1)
+
+                iris_landmarks = np.concatenate([   right_irisLM, 
+                                                    left_irisLM,   
+                                                ]).tolist()  # np.ndarray -> list 
+
+                iris_landmarks = [ (np.array((iw, ih , 1)) * irisLM).astype(np.float32) for irisLM in  iris_landmarks ] # Denormalize the iris position 
+
+
+                for x, y, z in iris_landmarks:
+                    cv2.circle(img, (int(x),int(y)), self.LARGE_CIRCLE_SIZE, self.YELLOW, -1)
+
+
+                # ========================= # 
+                #      Draw Face Mesh       #  
+                # ========================= # 
+                if draw:
+                    self.mpDraw.draw_landmarks(img, faceLms, self.mpFaceMesh.FACE_CONNECTIONS,
+                                                self.drawSpec, self.drawSpec) # (ref) https://github.com/google/mediapipe/blob/master/mediapipe/python/solutions/drawing_utils.py
+                    
+                    self.mpDraw.draw_landmarks(blank_img, faceLms, self.mpFaceMesh.FACE_CONNECTIONS,
+                                                self.drawSpec, self.drawSpec)
+
+
+                faceMesh_landmarks = [ ( np.array((iw, ih , 1)) * np.array((lm.x, lm.y, lm.z ))).astype(np.float32) for lm in faceLms.landmark ] # Denormalize the face mesh position 
+
+                faceMesh_landmarks.extend(iris_landmarks) # iris + facemesh  
 
 
 
-                for id, lm in enumerate(faceLms.landmark):
-#                    print(lm)
-                    x, y, z = int(lm.x * iw), int(lm.y * ih), int(lm.z * ic)
-#                    cv2.putText(img, str(id), (x, y), cv2.FONT_HERSHEY_PLAIN,
-#                               0.7, (0, 255, 0), 1)
+                for x, y, z in faceMesh_landmarks:
 
-#                    print(id,x,y)  # (Landmark_num , x_coordi, y_coordi)
                     face.append([x,y])
-
-
 
                     # ========================= # 
                     # Get the face bounding box # 
@@ -76,15 +116,15 @@ class FaceMeshDetector():
                     #  (ref) https://github.com/google/mediapipe/issues/1737  
 
                     if x < cx_min:
-                        cx_min = x 
+                        cx_min = int(x)
                     
                     if y < cy_min:
-                        cy_min = y
+                        cy_min = int(y)
                     
                     if x > cx_max:
-                        cx_max = x 
+                        cx_max = int(x)
                     if y > cy_max:
-                        cy_max = y 
+                        cy_max = int(y)
 
                 cv2.rectangle(img, (cx_min, cy_min), (cx_max, cy_max), (255, 255, 0), 2)
 

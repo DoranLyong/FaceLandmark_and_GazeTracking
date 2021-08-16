@@ -4,3 +4,5 @@ tqdm
 opencv-python
 numpy 
 albumentations
+tensorflow==2.6.0
+

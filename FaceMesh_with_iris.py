@@ -10,8 +10,7 @@ import mediapipe as mp   # by google
 from tqdm import tqdm 
 from omegaconf import OmegaConf #(ref) https://majianglin2003.medium.com/python-omegaconf-a33be1b748ab
 
-from utils.FaceMeshModule import FaceMeshDetector
-from gaze_tracking import GazeTracking
+from with_mediapipe.FaceMeshModule import FaceMeshDetector
 
 
 
@@ -27,7 +26,6 @@ def video_process(cap:cv2.VideoCapture):
 
         pTime = 0  # past time 
         detector = FaceMeshDetector(maxFaces=1) # only get one face 
-        gaze = GazeTracking()
 
 
         while True:
@@ -66,23 +64,6 @@ def video_process(cap:cv2.VideoCapture):
                 face_img = onlyfaces[idx].copy()
 
 
-                # ======================== # 
-                # Get iris using face mesh # 
-                # ======================== # 
-                gaze.refresh(onlyfaces[idx], onlyface_kps[idx] )
-
-                left_pupil = gaze.pupil_left_coords()  # (x, y) order
-                right_pupil = gaze.pupil_right_coords()
-                
-
-                # ================ # 
-                # pupil annotation # 
-                # ================ # 
-                cv2.circle(face_img, left_pupil, 3, (0,0, 255), -1)
-                cv2.circle(face_img, right_pupil, 3, (0,0, 255), -1)
-                cv2.circle(kp_portrait, left_pupil, 3, (255,255,255), -1)                   
-                cv2.circle(kp_portrait, right_pupil, 3, (255,255,255), -1)                   
-
 
                 for x,y in onlyface_kps[idx]:
                     # =============== # 
@@ -120,7 +101,7 @@ if __name__ == '__main__':
     
     data_dir = cfg.Required.inputPath
     video_list = sorted(os.listdir(data_dir))    
-    data_path = osp.join(data_dir, video_list[-1])
+    data_path = osp.join(data_dir, video_list[0])
 
     # ================ # 
     # Get video frames #

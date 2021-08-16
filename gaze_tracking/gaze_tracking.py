@@ -12,7 +12,6 @@ class GazeTracking(object):
     """ This class tracks the user's gaze.
         It provides useful information like: 
             - the position of the eyes and pupils
-            - and allows to know if the eyes are open or closed
     """
 
     def __init__(self):
