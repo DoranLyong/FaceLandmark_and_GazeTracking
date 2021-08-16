@@ -34,7 +34,7 @@ class FaceMeshDetector():
         # ============== #  
         # Albumentations # 
         # ============== #  
-        self.transform = A.Compose( [ A.Resize(height=224, width=224),  # (ref) https://www.programcreek.com/python/example/120573/albumentations.Resize
+        self.transform = A.Compose( [ A.Resize(height=256, width=256),  # (ref) https://www.programcreek.com/python/example/120573/albumentations.Resize
                                                                     ],    # (ref)https://albumentations.ai/docs/api_reference/augmentations/geometric/resize/
                                     keypoint_params=A.KeypointParams(format='xy', remove_invisible=True, angle_in_degrees=True) # (ref) https://albumentations.ai/docs/getting_started/keypoints_augmentation/ 
                                     )
@@ -101,7 +101,7 @@ class FaceMeshDetector():
                 if faceLms.landmark:
                     
                     cropped_face = raw_img[cy_min:cy_max+1, cx_min:cx_max+1]
-                    cropped_face = cv2.resize(cropped_face, dsize=(224,224))  
+                    cropped_face = cv2.resize(cropped_face, dsize=(256,256))  
                     
 
                     transformed_kps = self.kp_transform(face, *[cx_min, cy_min, cx_max, cy_max] )
