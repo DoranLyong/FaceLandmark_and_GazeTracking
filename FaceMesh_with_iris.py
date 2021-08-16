@@ -14,6 +14,26 @@ from with_mediapipe.FaceMeshModule import FaceMeshDetector
 
 
 
+
+
+def draw_points(img, kps, radian=1, color='sapphire', thickness=-1):
+    
+    COLOR = {   'blue':(255,0,0), 
+                'green':(0,255,0), 
+                'red':(0,0,255), 
+                'yellow':(0,255,255), 
+                'sapphire':(255,255,0)
+            }
+    for x, y in kps:
+        cv2.circle(img, (int(x),int(y)), radian, COLOR[color], thickness)
+
+    return img 
+
+
+
+
+
+
 #%%
 def video_process(cap:cv2.VideoCapture):
 
@@ -57,31 +77,27 @@ def video_process(cap:cv2.VideoCapture):
             cv2.imshow("Landmarks", landmarks_only )
 
 
-            print(f"num faces: {len(faces_kps)}")
-
-            for idx in range(len(faces_kps)):
-                kp_portrait = np.zeros_like(onlyfaces[idx])
-                face_img = onlyfaces[idx].copy()
-
-
-
-                for x,y in onlyface_kps[idx]:
-                    # =============== # 
-                    # Mesh annotation # 
-                    # =============== # 
-                    cv2.circle(face_img, (int(x),int(y)), 1, (255,255,0), -1)
-                    cv2.circle(kp_portrait, (int(x),int(y)), 1, (255,255,255), -1)
-
+#            print(f"num faces: {len(faces_kps)}")
 
             
-                cv2.imshow(f"ID: {idx}", face_img)
-                cv2.imshow(f"Landmakrs of ID: {idx}", kp_portrait)
-                cv2.imshow(f"Face only of ID:{idx}", onlyfaces[idx])
+            for idx in range(len(faces_kps)):
+                try: 
+                    kp_portrait = np.zeros_like(onlyfaces[idx])
+                    face_img = onlyfaces[idx].copy()
 
+                    face_img = draw_points(face_img, onlyface_kps[idx][:468] ) # Face mesh 
+                    face_img = draw_points(face_img, onlyface_kps[idx][468:], radian=2, color='red') # iris
+                    kp_portrait = draw_points(kp_portrait, onlyface_kps[idx][:468] ) # Face mesh 
+                    kp_portrait = draw_points(kp_portrait, onlyface_kps[idx][468:], radian=2, color='red') # iris 
+
+                    cv2.imshow(f"ID: {idx}", face_img)
+                    cv2.imshow(f"Landmakrs of ID: {idx}", kp_portrait)
+                    cv2.imshow(f"Face only of ID:{idx}", onlyfaces[idx])
+
+                except IndexError as e:
+                    pass 
 
             key = cv2.waitKey(1)
-
-            
             if key == 27 : # 'ESC'
                 break
 

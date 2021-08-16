@@ -92,7 +92,7 @@ class FaceMeshDetector():
                 # ================================== # 
                 #     Get the face area in resize    # 
                 # ================================== #
-                if faceLms.landmark:
+                try :
                     
                     cropped_face = raw_img[cy_min:cy_max+1, cx_min:cx_max+1]
                     cropped_face = cv2.resize(cropped_face, dsize=(256,256))  
@@ -102,6 +102,9 @@ class FaceMeshDetector():
 
                     onlyfaces.append(cropped_face)
                     onlyface_kps.append(transformed_kps)
+                
+                except cv2.error as e:
+                    pass 
 
                 faces_kps.append(face)
 
@@ -119,25 +122,28 @@ class FaceMeshDetector():
         # (ref) https://albumentations.ai/docs/getting_started/keypoints_augmentation/
         # (ref) https://imgaug.readthedocs.io/en/latest/source/jupyter_notebooks.html
 
-        cx_min, cy_min, cx_max, cy_max = bbox
+        try: 
+            cx_min, cy_min, cx_max, cy_max = bbox
 
-        h = cy_max  - cy_min + 1 
-        w = cx_max  - cx_min + 1 
+            h = cy_max  - cy_min + 1 
+            w = cx_max  - cx_min + 1 
 
-        portrait = np.zeros( [h, w], np.uint8 )
-
-
-        raw_landmark = np.array(face_landmarks) # (x, y )
-        translation = np.array([cx_min, cy_min])
-
-        landmark = raw_landmark - translation   # zero-centroid
-
-        transformed = self.transform(   image = portrait, 
-                                        keypoints= landmark.tolist(), # (ref) https://appia.tistory.com/175
-                                    )
+            portrait = np.zeros( [h, w], np.uint8 )
 
 
-        return transformed['keypoints']
+            raw_landmark = np.array(face_landmarks) # (x, y )
+            translation = np.array([cx_min, cy_min])
+
+            landmark = raw_landmark - translation   # zero-centroid
+
+            transformed = self.transform(   image = portrait, 
+                                            keypoints= landmark.tolist(), # (ref) https://appia.tistory.com/175
+                                        )    
+            return transformed['keypoints']
+        
+        except ValueError as e:
+            # return zeros 
+            return [ [0, 0] ] * 468 # face mesh 468
 
 
 

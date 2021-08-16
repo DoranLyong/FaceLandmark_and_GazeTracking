@@ -49,25 +49,32 @@ def from_landmarks_to_depth(
 
 def detect_iris(eye_frame, is_right_eye=False):
     side_low = 64
-    eye_frame_low = cv2.resize(
-        eye_frame, (side_low, side_low), interpolation=cv2.INTER_AREA
-    )
 
-    model_path = "models/iris_landmark.tflite"
+    try: 
 
-    if is_right_eye:
-        eye_frame_low = np.fliplr(eye_frame_low)
+        eye_frame_low = cv2.resize(
+            eye_frame, (side_low, side_low), interpolation=cv2.INTER_AREA
+        )
 
-    outputs = tflite_inference(eye_frame_low / 127.5 - 1.0, model_path)
-    eye_contours_low = np.reshape(outputs[0], (71, 3))
-    iris_landmarks_low = np.reshape(outputs[1], (5, 3))
+        model_path = "models/iris_landmark.tflite"
 
-    eye_contours = eye_contours_low / side_low
-    iris_landmarks = iris_landmarks_low / side_low
+        if is_right_eye:
+            eye_frame_low = np.fliplr(eye_frame_low)
 
-    if is_right_eye:
-        eye_contours[:, 0] = 1 - eye_contours[:, 0]
-        iris_landmarks[:, 0] = 1 - iris_landmarks[:, 0]
+        outputs = tflite_inference(eye_frame_low / 127.5 - 1.0, model_path)
+        eye_contours_low = np.reshape(outputs[0], (71, 3))
+        iris_landmarks_low = np.reshape(outputs[1], (5, 3))
+
+        eye_contours = eye_contours_low / side_low
+        iris_landmarks = iris_landmarks_low / side_low
+
+        if is_right_eye:
+            eye_contours[:, 0] = 1 - eye_contours[:, 0]
+            iris_landmarks[:, 0] = 1 - iris_landmarks[:, 0]
+
+    except cv2.error as e:
+        eye_contours = np.zeros([71, 3]) 
+        iris_landmarks = np.zeros([5, 3]) 
 
     return eye_contours, iris_landmarks
 
