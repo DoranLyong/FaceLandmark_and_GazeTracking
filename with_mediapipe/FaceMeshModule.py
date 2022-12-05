@@ -97,10 +97,10 @@ class FaceMeshDetector():
                 #      Draw Face Mesh       #  
                 # ========================= # 
                 if draw:
-                    self.mpDraw.draw_landmarks(img, faceLms, self.mpFaceMesh.FACEMESH_TESSELATION,
+                    self.mpDraw.draw_landmarks(img, faceLms, self.mpFaceMesh.FACEMESH_CONTOURS, # (ref) https://github.com/google/mediapipe/blob/master/mediapipe/python/solutions/face_mesh.py
                                                 self.drawSpec, self.drawSpec) # (ref) https://github.com/google/mediapipe/blob/master/mediapipe/python/solutions/drawing_utils.py
                     
-                    self.mpDraw.draw_landmarks(blank_img, faceLms, self.mpFaceMesh.FACEMESH_TESSELATION,
+                    self.mpDraw.draw_landmarks(blank_img, faceLms, self.mpFaceMesh.FACEMESH_CONTOURS,
                                                 self.drawSpec, self.drawSpec)
 
 
