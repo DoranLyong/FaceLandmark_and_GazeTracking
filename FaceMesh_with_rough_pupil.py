@@ -115,14 +115,12 @@ def video_process(cap:cv2.VideoCapture):
 if __name__ == '__main__':
     cfg = OmegaConf.load("cfg.yaml")
     
-    data_dir = cfg.Required.inputPath
-    video_list = sorted(os.listdir(data_dir))    
-    data_path = osp.join(data_dir, video_list[-1])
+    data_path = cfg.Required.inputPath
 
     # ================ # 
     # Get video frames #
     # ================ #
-    cap = cv2.VideoCapture(0)    
+    cap = cv2.VideoCapture(data_path)    
     video_fps = cap.get(cv2.CAP_PROP_FPS) 	# get default video FPS
     print(f"fps: {video_fps}")
 

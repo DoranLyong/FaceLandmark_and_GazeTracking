@@ -21,8 +21,11 @@ class FaceMeshDetector():
 
         self.mpDraw = mp.solutions.drawing_utils
         self.mpFaceMesh = mp.solutions.face_mesh
-        self.faceMesh = self.mpFaceMesh.FaceMesh(   self.staticMode, self.maxFaces,
-                                                    self.minDetectionCon, self.minTrackCon)
+        self.faceMesh = self.mpFaceMesh.FaceMesh(   static_image_mode=self.staticMode, 
+                                                    max_num_faces=self.maxFaces,
+                                                    refine_landmarks=False,
+                                                    min_detection_confidence=self.minDetectionCon, 
+                                                    min_tracking_confidence=self.minTrackCon)
         self.drawSpec = self.mpDraw.DrawingSpec(thickness=1, circle_radius=1)
 
         # ============== #  
@@ -47,9 +50,9 @@ class FaceMeshDetector():
         if self.results.multi_face_landmarks:
             for faceLms in self.results.multi_face_landmarks:
                 if draw:
-                    self.mpDraw.draw_landmarks(img, faceLms, self.mpFaceMesh.FACE_CONNECTIONS,
+                    self.mpDraw.draw_landmarks(img, faceLms, self.mpFaceMesh.FACEMESH_TESSELATION,
                                                 self.drawSpec, self.drawSpec) # (ref) https://github.com/google/mediapipe/blob/master/mediapipe/python/solutions/drawing_utils.py
-                    self.mpDraw.draw_landmarks(blank_img, faceLms, self.mpFaceMesh.FACE_CONNECTIONS,
+                    self.mpDraw.draw_landmarks(blank_img, faceLms, self.mpFaceMesh.FACEMESH_TESSELATION,
                                                 self.drawSpec, self.drawSpec)
                 face = []
 
