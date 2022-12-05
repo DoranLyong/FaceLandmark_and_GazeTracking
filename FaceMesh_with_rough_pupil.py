@@ -7,7 +7,6 @@ import yaml
 import cv2 
 import numpy as np 
 import mediapipe as mp   # by google 
-from tqdm import tqdm 
 from omegaconf import OmegaConf #(ref) https://majianglin2003.medium.com/python-omegaconf-a33be1b748ab
 
 from utils.FaceMeshModule import FaceMeshDetector
@@ -99,9 +98,7 @@ def video_process(cap:cv2.VideoCapture):
 
 
             key = cv2.waitKey(1)
-
-            
-            if key == 27 : # 'ESC'
+            if key==ord('q') : # 'ESC'
                 break
 
 

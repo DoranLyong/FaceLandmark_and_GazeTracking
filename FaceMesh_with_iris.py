@@ -1,4 +1,3 @@
-import sys 
 import os 
 import os.path as osp
 import time 
@@ -7,7 +6,6 @@ import yaml
 import cv2 
 import numpy as np 
 import mediapipe as mp   # by google 
-from tqdm import tqdm 
 from omegaconf import OmegaConf #(ref) https://majianglin2003.medium.com/python-omegaconf-a33be1b748ab
 
 from with_mediapipe.FaceMeshModule import FaceMeshDetector
@@ -28,8 +26,6 @@ def draw_points(img, kps, radian=1, color='sapphire', thickness=-1):
         cv2.circle(img, (int(x),int(y)), radian, COLOR[color], thickness)
 
     return img 
-
-
 
 
 
@@ -98,7 +94,7 @@ def video_process(cap:cv2.VideoCapture):
                     pass 
 
             key = cv2.waitKey(1)
-            if key == 27 : # 'ESC'
+            if key==ord('q') : # 'ESC'
                 break
 
 
@@ -115,14 +111,12 @@ def video_process(cap:cv2.VideoCapture):
 if __name__ == '__main__':
     cfg = OmegaConf.load("cfg.yaml")
     
-    data_dir = cfg.Required.inputPath
-    video_list = sorted(os.listdir(data_dir))    
-    data_path = osp.join(data_dir, video_list[0])
+    data_path = cfg.Required.inputPath
 
     # ================ # 
     # Get video frames #
     # ================ #
-    cap = cv2.VideoCapture(data_path)    
+    cap = cv2.VideoCapture(data_path) 
     video_fps = cap.get(cv2.CAP_PROP_FPS) 	# get default video FPS
     print(f"fps: {video_fps}")
 

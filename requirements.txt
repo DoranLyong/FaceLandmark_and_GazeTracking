@@ -1,8 +1,9 @@
-mediapipe
+python==3.9.13
+numpy==1.21.5
+tensorflow==2.8.1
+mediapipe==0.8.11
+opencv-python==4.6.0
 omegaconf
-tqdm
-opencv-python
-numpy 
 albumentations
-tensorflow==2.6.0
+PyYAML
 

@@ -1,5 +1,5 @@
 Required:
-    inputPath : "./videos"  # path to video samples 
+    inputPath : "./videos/test.avi"  # path to video samples or '0' for webcam
     displayWidth : 1280  # (ref) https://www.epiphan.com/userguides/avio-4k/Content/UserGuides/VideoGrabber/UVC/3-Capture/fpsResolutions&Ratios.htm
     displayHeight : 720 
 

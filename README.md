@@ -1,11 +1,26 @@
 # 468 Face Landmarks tutorial 
 
-#### 1. Install requirements 
+## 1. Install requirements 
 
 ```bash 
 ~$ pip install -r -U requirements.txt
 ```
+Tested on `python=3.10.8`
 
+### (Update 2022.12.02) 
+There are some OpenCV dependency issues while installing [Albumentations](https://albumentations.ai/docs/getting_started/installation/). So, please follow bellow instructions:
+```bash
+pip install numpy==1.21.5
+pip install tensorflow==2.8.1
+pip install mediapipe==0.8.11
+pip install opencv-python==4.6.0
+pip install omegaconf 
+pip install PyYAML
+
+pip install -U albumentations --no-binary qudida,albumentations
+```
+
+<br/>
 
 
 For the iris example, download ```iris_landmark.tflite``` 
@@ -19,7 +34,7 @@ For the iris example, download ```iris_landmark.tflite```
 
 
 
-#### 2. Run the code 
+## 2. Run the code 
 
 ```bash
 ~$ python FaceMesh_with_rough_pupil.py  # Mediapipe face mesh & OpenCV usage eye pupil 
